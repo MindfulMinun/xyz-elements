@@ -1,0 +1,9 @@
+{
+  "name": "xyz-player",
+  "version": "0.1.0",
+  "description": "A lightweight HTML5 player, built with custom elements.",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {}
+}
