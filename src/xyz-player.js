@@ -18,9 +18,9 @@
     }
     const temp = document.createElement('template')
     temp.innerHTML = `
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500">
         <style>
+            /* Must be defined by BOTH the host and the custom element for some reason?? */
+            @import url("https://fonts.googleapis.com/css?family=Material+Icons|Roboto:400,500");
             *, *::before, *::after {
                 box-sizing: border-box;
             }
@@ -29,12 +29,12 @@
                 position: relative;
                 contain: content;
                 font-family: "Roboto", sans-serif;
-                /* height: 144px;
-                width: 256px; */
+                line-height: 1.5;
                 overflow: visible;
                 margin: 1rem;
                 font-size: 16px;
                 background: #000;
+                color: #fff;
                 --accent: #448aff;
                 --tooltip-bg: #424242;
                 --scrubber-head-size: 14px;
@@ -315,7 +315,7 @@
             updateScrubberProgress()
         })
         v.addEventListener('durationchange', function () {
-            progress.textContent = dict.formatNumericProgress()
+            progress.textContent = dict.formatNumericProgress(v)
             canvas.width = v.duration
         })
         v.addEventListener('progress', () => {
