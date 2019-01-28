@@ -316,7 +316,8 @@
         })
         v.addEventListener('durationchange', function () {
             progress.textContent = dict.formatNumericProgress(v)
-            canvas.width = v.duration
+            // Antialiasing sucks.
+            canvas.width = canvas.offsetWidth * 2
         })
         v.addEventListener('progress', () => {
             updateScrubberProgress()
@@ -398,7 +399,7 @@
                 scrubberHead.setAttribute('data-time', formatTime(v.currentTime))
             }
             // Loaded progress
-            var unit = canvas.width / v.duration // Usually 1px, *usually*
+            var unit = canvas.width / v.duration
             ctx.clearRect(0, 0, canvas.width, canvas.height)
 
             // ctx.fillStyle = 'rgba(255,255,255, .52)';
@@ -410,7 +411,7 @@
                 var end = v.buffered.end(i) * unit
                 var delta = end - start
 
-                ctx.fillRect(start, 0, delta, canvas.height)
+                ctx.fillRect(~~start, 0, ~~delta, canvas.height)
                 ctx.stroke()
             }
         }
