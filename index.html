@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Example</title>
+        <script src="./src/xyz-player.js" charset="utf-8"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons|Roboto:400,500">
+        <script type="text/javascript">
+            XyzPlayer.register();
+        </script>
+        <style media="screen">
+            .container {
+                max-width: 640px;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <xyz-player src="https://benjic.xyz/assets/goodbye/goodbye.mp4"></xyz-player>
+            <table style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th colspan="2">Atajos de teclado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><kbd>Espacio</kbd></td>
+                        <td>Reproducir / Pausar</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>&gt;</kbd></td>
+                        <td>Retroceder 5 seg</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>&lt;</kbd></td>
+                        <td>Avanzar 5 seg</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>0-9</kbd></td>
+                        <td>Brincar</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>f</kbd></td>
+                        <td>Entrar / Salir de Pantalla completa</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>p</kbd></td>
+                        <td>Entrar en modo Pantalla en Pantalla (solo si el navegador lo permite)</td>
+                    </tr>
+                    <tr>
+                        <td><kbd>d</kbd></td>
+                        <td>Depurar</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

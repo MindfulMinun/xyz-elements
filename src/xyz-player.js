@@ -16,6 +16,7 @@
         forward: "Avanzar",
         rewind: "Retroceder"
     }
+    const $ymbol = Symbol('xyz-player')
     const temp = document.createElement('template')
     temp.innerHTML = `
         <style>
@@ -242,20 +243,22 @@
         // Keyboard controls
         that.addEventListener('keydown', function (e) {
             /**
+             * (Space)  Play/Pause
              * <        Rewind 5 seconds
              * >        Fast-forward 5 seconds
-             * (Space)  Play/Pause
              * 0-9      Numeric leaps (like what YouTube does)
              * f        Toggle Fullscreen
              * p        Toggle Picture-in-picture
             **/
             restartIdleTimeout()
             switch (e.key) {
+                case ',': // <
                 case 'Left':
                 case 'ArrowLeft':
                     v.currentTime -= 5
                     updateScrubberProgress()
                     break
+                case '.': // >
                 case 'Right':
                 case 'ArrowRight':
                     v.currentTime += 5
