@@ -2,6 +2,8 @@
  * XyzPlayer
  */
 (function () {
+    // Comment the following line for Spanish labels
+    /*
     const dict = {
         scrubberA11yLabel: "Búsqueda en video",
         scrubberA11yDefault: "Cargando...",
@@ -16,7 +18,23 @@
         forward: "Avanzar",
         rewind: "Retroceder"
     }
-    const $ymbol = Symbol('xyz-player')
+    /*/
+    const dict = {
+        scrubberA11yLabel: "Scrubber",
+        scrubberA11yDefault: "Loading...",
+        scrubberA11yVal: (v) => `${formatTime(v.currentTime)} out of ${formatTime(v.duration)}`,
+        formatNumericProgress: (v) => `${formatTime(v.currentTime)} / ${formatTime(v.duration)}`,
+        numericProgressDefault: '0:00 / 0:00',
+        pip: 'Picture\u2011in\u2011picture',
+        enterFs: 'Fullscreen',
+        exitFs: 'Exit\u00a0Fullscreen',
+        pause: 'Pause',
+        play: 'Play',
+        forward: "Fast\u2011forward",
+        rewind: "Rewind"
+    }
+    // */
+
     const temp = document.createElement('template')
     temp.innerHTML = `
         <style>
@@ -34,6 +52,7 @@
                 overflow: visible;
                 margin: 1rem;
                 font-size: 16px;
+                font-weight: 400;
                 background: #000;
                 color: #fff;
                 --accent: #448aff;
@@ -462,18 +481,19 @@
             let ret = {}
             let v = this.video
 
-            // ret += 'Current time: ' + v.currentTime + 's'
-            // ret += '\n'
             ret.now = v.currentTime
-            // ret += 'No. of Buffers: ' + v.buffered.length
-            // ret += '\n'
-
+            ret.length = v.duration
+            ret.percComplete = v.currentTime / v.duration
+            ret.state = ['Nothing', 'Meta', 'Now', 'Future', 'End'][v.readyState]
+            ret.networkState = ['Empty', 'Idle', 'Loading', 'NoSource'][v.networkState]
             ret.noOfBuffers = v.buffered.length
+
             for (var i = 0; i < v.buffered.length; i++) {
-                let delta = v.buffered.end(i) - v.currentTime
-                if (Math.abs(delta) === delta) {
-                    // ret += 'Lookahead: ' + delta + 's'
-                    ret.lookahead = delta
+                let end = v.buffered.end(i)
+                ,   now = v.currentTime
+                ;
+                if (now <= end) {
+                    ret.lookahead = end - now;
                 }
             }
             return ret
