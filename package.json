@@ -1,12 +1,12 @@
 {
-  "name": "xyz-custom-elemenst",
+  "name": "xyz-elements",
   "version": "0.1.0",
   "description": "Custom elements",
   "main": "dist/index.js",
   "author": "MindfulMinun <importantmails4bc@gmail.com> (https://benjic.xyz)",
   "contributors": [],
-  "homepage": "https://github.com/MindfulMinun/xyz-custom-elemenst",
-  "repository": "github:MindfulMinun/xyz-custom-elemenst",
+  "homepage": "https://github.com/MindfulMinun/xyz-elements",
+  "repository": "github:MindfulMinun/xyz-elements",
   "license": "MIT",
   "private": true,
   "scripts": {
