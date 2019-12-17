@@ -8,11 +8,9 @@
         <script src="./index.js" charset="utf-8" onload="XyzSheet.register();"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons|Roboto:400,500">
         <style media="screen">
-            *,
-            *::before,
-            *::after {
+            /* *, *::before, *::after {
                 box-sizing: border-box;
-            }
+            } */
             html, body {
                 font-family: "Roboto", Helvetica, Arial, sans-serif;
             }
@@ -23,13 +21,11 @@
             .flex-grow {
                 flex: 1;
             }
-
-
         </style>
     </head>
     <body>
-        <xyz-sheet peek active>
-            <div slot="peek" class="flex">
+        <xyz-sheet peek style="--accent: #E46A98">
+            <div slot="peek" class="flex" aria-label="ily">
                 <span class="flex-grow">Hello world!</span>
                 <i class="material-icons rotate">keyboard_arrow_up</i>
             </div>

@@ -14,10 +14,9 @@
             --anim-std: cubic-bezier(0.4, 0.0, 0.2, 1);
             --accent: #448aff;
             --peek-calculated-height: 0;
-            line-height: 1.5;
+            --peek-inverted-height: 0;
+            display: block;
         }
-        
-        *, *::before, *::after { box-sizing: border-box; }
         
         .xyz-sheet__modal {
             position: fixed;
@@ -75,14 +74,14 @@
             pointer-events: all;
         }
         :host([peek]) > .xyz-sheet__sheet {
-            transform: translateY(var(--peek-calculated-height));
+            transform: translateY(var(--peek-inverted-height));
         }
         :host([active]) > .xyz-sheet__sheet {
             transform: translateY(-100%);
         }
         
         :host([peek]) {
-            margin-bottom: 4em;
+            padding-bottom: var(--peek-calculated-height);
         }
         
         
@@ -151,17 +150,14 @@
         const btn = sheet.querySelector('button')
         const ro = !("ResizeObserver" in window) ? null : new ResizeObserver(entries => {
             for (let entry of entries) {
-                if (entry.contentRect.height === 0) {
-                    btn.remove()
-                }
-
-                const calcdHeight = `-${
+                const height = `${
                     entry.contentRect.height +
                     entry.contentRect.y * 2
                 }px`
-                entry.contentRect.height
-                console.log(entry)
-                that.style.setProperty('--peek-calculated-height', calcdHeight)
+
+
+                that.style.setProperty('--peek-calculated-height', height)
+                that.style.setProperty('--peek-inverted-height', '-' + height)
             }
         })
             
