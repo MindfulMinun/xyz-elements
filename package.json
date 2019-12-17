@@ -1,9 +1,29 @@
 {
-  "name": "xyz-player",
+  "name": "xyz-custom-elemenst",
   "version": "0.1.0",
-  "description": "A lightweight HTML5 player, built with custom elements.",
+  "description": "Custom elements",
   "main": "dist/index.js",
+  "author": "MindfulMinun <importantmails4bc@gmail.com> (https://benjic.xyz)",
+  "contributors": [],
+  "homepage": "https://github.com/MindfulMinun/xyz-custom-elemenst",
+  "repository": "github:MindfulMinun/xyz-custom-elemenst",
   "license": "MIT",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "build": "rm -rf dist && babel src -d dist",
+    "watch": "nodemon --watch src --exec 'npm run build'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=8.0.0 <11.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "dotenv": "^8.1.0",
+    "nodemon": "^1.18.9"
+  },
+  "dependencies": {}
 }

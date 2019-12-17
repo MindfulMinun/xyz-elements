@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>xyz-sheet</title>
+        <script src="../src/xyz-sheet.js" charset="utf-8" onload="XyzSheet.register();"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons|Roboto:400,500">
+        <style media="screen">
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+            }
+            html, body {
+                font-family: "Roboto", Helvetica, Arial, sans-serif;
+            }
+
+            .flex {
+                display: flex;
+            }
+            .flex-grow {
+                flex: 1;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <xyz-sheet peek active>
+            <div slot="peek" class="flex">
+                <span class="flex-grow">Hello world!</span>
+                <i class="material-icons rotate">keyboard_arrow_up</i>
+            </div>
+            <p>Vaciló y con esa voz llana, impersonal, a que solemos recurrir para confiar algo muy íntimo, dijo que para terminar el poema le era indispensable la casa, pues en un ángulo del sótano había un Aleph. Aclaró que un Aleph es uno de los puntos del espacio que contienen todos los puntos.</p>
+
+            <p>—Está en el sótano del comedor— explicó, aligerada su dicción por la angustia—. Es mío, es mío; yo lo descubrí en la niñez, antes de la edad escolar. La escalera del sótano es empinada, mis tíos me tenían prohibido el descenso, pero alguien dijo que había un mundo en el sótano. Se refería, lo supe después, a un baúl, pero yo entendí que había un mundo. Bajé secretamente, rodé por la escalera vedada, caí. Al abrir los ojos, vi el Aleph.</p>
+                
+            <p>—¡El Aleph!—repetí.</p>
+        </xyz-sheet>
+
+    </body>
+</html>
