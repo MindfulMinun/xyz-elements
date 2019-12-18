@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>xyz-progress</title>
+        <script src="./index.js" charset="utf-8" onload="XyzProgress.register();"></script>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500">
+        <style media="screen">
+            .container {
+                max-width: 640px;
+                margin: 0 auto;
+                font-family: "Roboto", Helvetica, Arial, sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>xyz-progress</h1>
+            <p>
+                The xyz-progress element indicates the linear progression of some task.
+                The progress is indicated by the <code>value</code> attribute, which
+                should be between 0 and 1. The absence of this attribute indicates that the
+                progress is indeterminate, so I suggest you set the values of determinate
+                progressions to 0
+            </p>
+
+            <p>Constant</p>
+            <xyz-progress style="--accent: #E46A98" value=".18"></xyz-progress>
+            
+            <p>Progression</p>
+            <xyz-progress style="--accent: #E46A98" value="0"></xyz-progress>
+
+            
+            <p>Indeterminate</p>
+            <xyz-progress style="--accent: #E46A98"></xyz-progress>
+
+            <p>Indeterminate to completion</p>
+            <xyz-progress style="--accent: #E46A98"></xyz-progress>
+
+
+            <p>Progression to indeterminate</p>
+            <xyz-progress style="--accent: #E46A98" value=".7"></xyz-progress>
+        </div>
+    </body>
+
+    <script>
+        const p = document.querySelectorAll('xyz-progress')
+
+        // Increase for looks
+        setInterval(function () {
+            p[1].setAttribute('value',
+                Math.min(+p[1].getAttribute('value') + .1, 1)
+            )
+        }, 1000)
+
+        setTimeout(function () {
+            p[3].setAttribute('value', 0)
+            // Why am I using two rAF calls?
+            // https://youtu.be/cCOL7MC4Pl0?t=1229
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    p[3].setAttribute('value', 1)
+                })
+            })
+        }, 1400)
+
+
+        setTimeout(function () {
+            p[4].removeAttribute('value')
+        }, 1000)
+
+
+    </script>
+</html>
