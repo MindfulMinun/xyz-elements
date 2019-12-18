@@ -12,7 +12,6 @@
     const styles = `
         :host {
             --anim-std: cubic-bezier(0.4, 0.0, 0.2, 1);
-            --accent: #448aff;
             --peek-calculated-height: 0;
             --peek-inverted-height: 0;
             display: block;
@@ -58,11 +57,14 @@
         .xyz-sheet__peek {
             border: 1px solid #000;
             padding: 1em;
+            transition: background var(--anim-std) 200ms;
         }
         
-        .xyz-sheet__peek:focus {
-            outline: 2px solid var(--accent);
+        .xyz-sheet__peek:focus,
+        :host:focus .xyz-sheet__peek {
+            outline: 2px solid var(--accent, #448aff);
             outline-offset: -2px;
+            background-color: #EEEEEE;
         }
         
         :host > .xyz-sheet__sheet > .xyz-sheet__content {
@@ -72,6 +74,9 @@
         :host([active]) > .xyz-sheet__modal {
             opacity: .52;
             pointer-events: all;
+        }
+        :host([active]) > .xyz-sheet__modal:focus {
+            opacity: .72;
         }
         :host([peek]) > .xyz-sheet__sheet {
             transform: translateY(var(--peek-inverted-height));
@@ -105,8 +110,8 @@
             const shadow = this.attachShadow({ mode: 'open' })
             // this.classList.add('xyz-sheet')
             shadow.appendChild(createStyles(this, shadow))
-            shadow.appendChild(createModal(this, shadow))
             shadow.appendChild(createSheet(this, shadow))
+            shadow.appendChild(createModal(this, shadow))
         }
 
         open() {
@@ -175,8 +180,10 @@
     function createModal(that) {
         const button = document.createElement('button')
         button.classList.add('xyz-sheet__modal')
+        button.setAttribute('aria-label', 'Close')
         button.addEventListener('click', function () {
             that.toggle()
+            document.activeElement.blur()
         })
         return button
     }
