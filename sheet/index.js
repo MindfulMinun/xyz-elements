@@ -12,8 +12,8 @@
     const styles = `
         :host {
             --anim-std: cubic-bezier(0.4, 0.0, 0.2, 1);
-            --peek-calculated-height: 0;
-            --peek-inverted-height: 0;
+            --content-height: 0;
+            --peek-height: 0;
             display: block;
         }
         
@@ -27,15 +27,17 @@
             background: #000;
             transition: opacity var(--anim-std) 200ms;
             pointer-events: none;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
         
         .xyz-sheet__sheet {
             position: fixed;
             left: 0; right: 0; top: 100%;
+            opacity: 1;
             z-index: 3;
             max-height: 100%;
             overflow: scroll;
-            background-color: #272727;
             color: white;
             transform: translateY(0);
             transition: transform var(--anim-std) 200ms;
@@ -68,6 +70,10 @@
         }
         
         :host > .xyz-sheet__sheet > .xyz-sheet__content {
+            background-color: #272727;
+            transition: opacity var(--anim-std) 200ms;
+            display: inline-block;
+            opacity: 0;
             padding: 0 1em;
         }
         
@@ -79,14 +85,17 @@
             opacity: .72;
         }
         :host([peek]) > .xyz-sheet__sheet {
-            transform: translateY(var(--peek-inverted-height));
+            transform: translateY(var(--peek-height));
         }
         :host([active]) > .xyz-sheet__sheet {
             transform: translateY(-100%);
         }
+        :host([active]) > .xyz-sheet__sheet > .xyz-sheet__content {
+            opacity: 1;
+        }
         
         :host([peek]) {
-            padding-bottom: var(--peek-calculated-height);
+            padding-bottom: var(--peek-height);
         }
         
         
@@ -112,6 +121,18 @@
             shadow.appendChild(createStyles(this, shadow))
             shadow.appendChild(createSheet(this, shadow))
             shadow.appendChild(createModal(this, shadow))
+
+            const parent = (document.head || document.documentElement)
+
+            if (parent) {
+                const styles = document.createElement('style');
+                styles.innerHTML = `
+                    .xyz-sheet__body-stop-scrolling {
+                        overflow: hidden;
+                    }
+                `;
+                document.body.appendChild(styles);
+            }
         }
 
         open() {
@@ -122,6 +143,16 @@
         }
         toggle() {
             this.toggleAttribute('active')
+        }
+
+        attributeChangedCallback(name, oldVal, newVal) {
+            if (name === 'active') {
+                if (typeof newVal === 'string') {
+                    document.body.classList.add('xyz-sheet__body-stop-scrolling')
+                } else {
+                    document.body.classList.remove('xyz-sheet__body-stop-scrolling')
+                }
+            }
         }
 
         static get observedAttributes() {
@@ -148,23 +179,19 @@
                 <slot name="peek"></slot>
             </button>
             <div class="xyz-sheet__content">
-                <slot></slot>
+                <slot name="content"></slot>
             </div>
         `
 
-        const btn = sheet.querySelector('button')
+        let prevPeekHeight = 58
+        
         const ro = !("ResizeObserver" in window) ? null : new ResizeObserver(entries => {
             for (let entry of entries) {
-                const height = `${
-                    entry.contentRect.height +
-                    entry.contentRect.y * 2
-                }px`
-
-
-                that.style.setProperty('--peek-calculated-height', height)
-                that.style.setProperty('--peek-inverted-height', '-' + height)
+                resize(that, sheet, btn)
             }
         })
+
+        const btn = sheet.querySelector('button')
             
         
         btn.addEventListener('click', function () {
@@ -172,7 +199,14 @@
         })
         
         // Listen for resize lol
-        ro && ro.observe(btn)
+        ro && ro.observe(sheet)
+
+        resize(that, sheet, btn)
+
+        requestAnimationFrame(function () {
+            console.log(sheet)
+            sheet.classList.add('xyz-sheet--ready')
+        })
 
         return sheet
     }
@@ -186,6 +220,22 @@
             document.activeElement.blur()
         })
         return button
+    }
+
+    function resize(that, sheet, btn) {
+        const sheetHeight = sheet.getBoundingClientRect().height
+        const btnHeight = btn.getBoundingClientRect().height
+
+
+        that.style.setProperty(
+            '--peek-height',
+            `${-btnHeight}px`
+        )
+
+        that.style.setProperty(
+            '--content-height',
+            `${sheetHeight - btnHeight}px`
+        )
     }
 
     return XyzSheet
