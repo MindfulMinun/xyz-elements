@@ -72,7 +72,7 @@
         :host > .xyz-sheet__sheet > .xyz-sheet__content {
             background-color: #272727;
             transition: opacity var(--anim-std) 200ms;
-            display: inline-block;
+            display: flow-root;
             opacity: 0;
             padding: 0 1em;
         }

@@ -16,7 +16,15 @@
     </head>
     <body>
         <div class="container">
-            <xyz-player src="https://benjic.xyz/assets/goodbye/goodbye.mp4"></xyz-player>
+            <xyz-player poster="./thumbnail.png" data-media="{
+                &quot;title&quot;: &quot;Sample title&quot;,
+                &quot;artist&quot;: &quot;Sample artist&quot;,
+                &quot;album&quot;: &quot;Sample album&quot;
+            }">
+                <!-- <source src="./www.mp4" type="video/mp4"> -->
+                <source src="https://benjic.xyz/assets/goodbye/goodbye.webm" type="video/webm">
+                <!-- <track label="English" kind="subtitles" srclang="en" src="./captions.vtt" default> -->
+            </xyz-player>
             <table style="width: 100%;">
                 <thead>
                     <tr>

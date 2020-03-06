@@ -7,31 +7,43 @@
     const dict = {
         scrubberA11yLabel: "Búsqueda en video",
         scrubberA11yDefault: "Cargando...",
-        scrubberA11yVal: (v) => `${formatTime(v.currentTime)} de ${formatTime(v.duration)}`,
+        scrubberA11yVal: (v) => `${a11yTime(v.currentTime)} de ${a11yTime(v.duration)}`,
         formatNumericProgress: (v) => `${formatTime(v.currentTime)} / ${formatTime(v.duration)}`,
         numericProgressDefault: '0:00 / 0:00',
         pip: 'Pantalla\u00a0en\u00a0Pantalla',
+        screenshot: 'Capturar\u00a0fotograma',
         enterFs: 'Pantalla completa',
         exitFs: 'Salir de pantalla completa',
         pause: 'Pausar',
         play: 'Reproducir',
         forward: "Avanzar",
-        rewind: "Retroceder"
+        rewind: "Retroceder",
+        time: {
+            hrs: 'hrs',
+            mins: 'min',
+            secs: 'seg'
+        }
     }
     /*/
     const dict = {
         scrubberA11yLabel: "Scrubber",
         scrubberA11yDefault: "Loading...",
-        scrubberA11yVal: (v) => `${formatTime(v.currentTime)} out of ${formatTime(v.duration)}`,
+        scrubberA11yVal: (v) => `${a11yTime(v.currentTime)} out of ${a11yTime(v.duration)}`,
         formatNumericProgress: (v) => `${formatTime(v.currentTime)} / ${formatTime(v.duration)}`,
         numericProgressDefault: '0:00 / 0:00',
         pip: 'Picture\u2011in\u2011picture',
+        screenshot: 'Screenshot',
         enterFs: 'Fullscreen',
         exitFs: 'Exit\u00a0Fullscreen',
         pause: 'Pause',
         play: 'Play',
         forward: "Fast\u2011forward",
-        rewind: "Rewind"
+        rewind: "Rewind",
+        time: {
+            hrs: 'hrs',
+            mins: 'min',
+            secs: 'sec'
+        }
     }
     // */
 
@@ -67,6 +79,12 @@
                 display: block;
                 margin: auto;
                 height: 100%; width: 100%;
+                transition: opacity var(--standard-curve) .2s;
+            }
+
+            :host ::cue {
+                color: #fff;
+                background-color: rgba(0, 0, 0, 0.6);
             }
 
             .xyz-player {
@@ -88,6 +106,8 @@
             .xyz-controls:hover .xyz-controls__scrubber__head { opacity: 1; }
             .xyz-player--hide-controls { cursor: none; }
             .xyz-player--hide-controls .xyz-controls { opacity: 0; }
+            .xyz-player--seeking { cursor: ew-resize; }
+            .xyz-player--seeking video { opacity: .52; }
 
             .xyz-controls__btn {
                 position: relative;
@@ -184,7 +204,7 @@
                 <div class="xyz-controls__scrubber" tabindex="0" role="slider"
                     aria-label="${dict.scrubberA11yLabel}"
                     aria-valuetext="${dict.scrubberA11yDefault}"
-                    draggable="false"
+                    draggable="true"
                     aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"
                     style="touch-action: none;">
                     <canvas class="xyz-controls__scrubber-loaded" height="8"></canvas>
@@ -225,6 +245,12 @@
                         PIP
                     </button>
                     <button class="xyz-controls__btn"
+                        data-action="screenshot"
+                        title="${dict.screenshot}"
+                        aria-label="${dict.screenshot}">
+                        <i class="material-icons">aspect_ratio</i>
+                    </button>
+                    <button class="xyz-controls__btn"
                         data-action="fs"
                         title="${dict.enterFs}"
                         aria-label="${dict.enterFs}">
@@ -238,6 +264,7 @@
     const init = function (that) {
         const shadow = that.shadowRoot
 
+        /** @type HTMLVideoElement */
         const v = shadow.querySelector('video')
         const container = shadow.querySelector('.xyz-player')
         const controls = shadow.querySelector('.xyz-controls')
@@ -250,14 +277,20 @@
 
         const fr = shadow.querySelector('[data-action="f-rewind"]')
         const pp = shadow.querySelector('[data-action="pp"]')
+        const screenshot = shadow.querySelector('[data-action="screenshot"]')
         const ff = shadow.querySelector('[data-action="f-forward"]')
         const fs = shadow.querySelector('[data-action="fs"]')
         const pip = shadow.querySelector('[data-action="pip"]')
 
+        requestAnimationFrame(() => {
+            v.append(...that.children)
+        })
+
         that.setAttribute('tabindex', 0)
 
         // Hide the PIP button if the browser doesn't support it.
-        shadow.querySelector('[data-action="pip"]').hidden = !document.pictureInPictureEnabled
+        pip.hidden = !document.pictureInPictureEnabled
+        screenshot.hidden = true
 
         // Keyboard controls
         that.addEventListener('keydown', function (e) {
@@ -338,8 +371,9 @@
         })
         v.addEventListener('durationchange', function () {
             progress.textContent = dict.formatNumericProgress(v)
+            screenshot.hidden = taints(v)
             // Antialiasing sucks.
-            canvas.width = canvas.offsetWidth * 2
+            canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1)
         })
         v.addEventListener('progress', () => {
             updateScrubberProgress()
@@ -361,6 +395,7 @@
         // Controller event listeners
         ff.addEventListener('click', () => {
             v.currentTime += 5
+            v.currentTime = unit * +e.key
             updateScrubberProgress()
         })
         fr.addEventListener('click', () => {
@@ -376,12 +411,65 @@
                     v.requestPictureInPicture() : document.exitPictureInPicture()
             }
         })
+        screenshot.addEventListener('click', () => {
+            const c = document.createElement('canvas')
+            const a = document.createElement('a')
+            const ctx = c.getContext('2d')
+                ;
+        
+            [c.height, c.width] = [v.videoHeight, v.videoWidth]
+            
+            ctx.drawImage(v, 0, 0, c.width, c.height)
+            a.href = c.toDataURL()
+            
+            document.body.appendChild(a)
+            a.setAttribute('download', 'frame.png')
+            a.click()
+            document.body.removeChild(a)
+        })
 
         scrubber.addEventListener('click', e => {
             var rect = scrubber.getBoundingClientRect()
             var x = (e.clientX - rect.left) / rect.width
             v.currentTime = v.duration * x
             updateScrubberProgress()
+        })
+
+        let stateBeforeScrub = null
+        scrubber.addEventListener('dragstart', e => {
+            const img = new Image()
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+            e.dataTransfer.setDragImage(img, 20, 20)
+            e.dataTransfer.effectAllowed = 'none'
+        })
+        scrubber.addEventListener('drag', e => {
+            if (!stateBeforeScrub) {
+                stateBeforeScrub = v.paused ? 'paused' : 'playing'
+                v.pause()
+            }
+            container.classList.add('xyz-player--seeking')
+            // After dragging, the drop position is set to to zero for some reason.
+            // Just assume the scrubber isn't in the top left corner and ignore (0, 0)
+            if (e.screenX + e.screenY + e.clientX + e.clientY !== 0) {
+                var rect = scrubber.getBoundingClientRect()
+                var x = (e.clientX - rect.left) / rect.width
+                v.currentTime = v.duration * x
+                updateScrubberProgress(x)
+            }
+            restartIdleTimeout()
+        }, { passive: true })
+        scrubber.addEventListener('dragend', e => {
+            var rect = scrubber.getBoundingClientRect()
+            var x = (e.clientX - rect.left) / rect.width
+            v.currentTime = v.duration * Math.min(Math.max(x, 0), 1)
+
+            container.classList.remove('xyz-player--seeking')
+            updateScrubberProgress()
+            restartIdleTimeout()
+            if (stateBeforeScrub === 'playing') {
+                v.play()
+            }
+            stateBeforeScrub = null
         })
 
         fs.addEventListener('click', () => {
@@ -401,6 +489,8 @@
                 fs.setAttribute('aria-label', dict.enterFs)
             }
         }
+        
+        that.updateMediaAttributes()
 
         document.addEventListener("fullscreenchange", fsChangeHandler)
         document.addEventListener("webkitfullscreenchange", fsChangeHandler)
@@ -408,9 +498,13 @@
         document.addEventListener("MSFullscreenChange", fsChangeHandler)
 
         // Scrubber update
-        function updateScrubberProgress() {
+        function updateScrubberProgress(linearinterop) {
             // Scrubber Progress
-            let ratio = v.currentTime / v.duration * 100
+            
+            if (v.seeking && !linearinterop) { return }
+            linearinterop = (linearinterop * v.duration) || v.currentTime
+
+            let ratio = linearinterop / v.duration * 100
             if (Number.isFinite(ratio)) {
                 if (scrubberProgress.attributeStyleMap) {
                     let perc = CSS.percent(ratio)
@@ -468,11 +562,15 @@
                 case "data-accent":
                     this.style.setProperty('--accent', newVal)
                     break
+                case "poster":
+                    v.setAttribute('poster', newVal)
+                    this.updateMediaAttributes()
+                    break
                 default:
                     v[name] = newVal
             }
         }
-        static get observedAttributes() { return ['src', 'data-accent'] }
+        static get observedAttributes() { return ['src', 'poster', 'data-accent', 'data-media'] }
         get video() { return this.shadowRoot.querySelector('video') }
         // Exposed methods
         enterFullscreen() { enterFullscreen(this) }
@@ -498,26 +596,80 @@
             }
             return ret
         }
+        updateMediaAttributes() {
+            if ('mediaSession' in navigator) {
+                const obj = {}
+                const ms = navigator.mediaSession
+    
+                if (this.video.getAttribute('poster')) {
+                    Object.assign(obj, {
+                        artwork: [{
+                            sizes: '320x180',
+                            src: this.video.getAttribute('poster'),
+                            type: ''
+                        }]
+                    })
+                }
+                if (this.dataset.media) {
+                    Object.assign(obj, JSON.parse(this.dataset.media))
+                }
+                ms.metadata = new MediaMetadata(obj)
+                ms.setActionHandler('seekforward', () => this.video.currentTime += 5)
+                ms.setActionHandler('seekbackward', () => this.video.currentTime -= 5)
+            }
+        }
         static register(name = 'xyz-player') { customElements.define(name, XyzPlayer) }
     }
 
     // Helpers (hoisted)
-    function formatTime(timeInSeconds) {
-        timeInSeconds = (timeInSeconds === timeInSeconds) ? timeInSeconds : 0;
-        var sign = Math.abs(timeInSeconds) === timeInSeconds;
-        timeInSeconds = Math.abs(timeInSeconds);
+    function formatTime(seconds) {
+        const chunks = timeToChunks(seconds)
+        let ret = ""
+
+        if (chunks.hrs > 0) {
+            ret += chunks.hrs + ":" + (chunks.mins < 10 ? "0" : "")
+        }
+        ret += chunks.mins + ":" + (chunks.secs < 10 ? "0" : "")
+        ret += chunks.secs
+        return (chunks.sign === '+' ? '' : '-') + ret
+    }
+    function timeToChunks(timeInSeconds) {
+        timeInSeconds = (timeInSeconds === timeInSeconds) ? timeInSeconds : 0
+        var sign = Math.abs(timeInSeconds) === timeInSeconds
+        timeInSeconds = Math.abs(timeInSeconds)
         var hrs  = ~~(timeInSeconds / 3600)
         ,   mins = ~~((timeInSeconds % 3600) / 60)
         ,   secs = ~~(timeInSeconds % 60)
-        ,   ret  = ""
+        ,   out  = {}
         ;   // just to piss everyone off
 
-        if (hrs > 0) {
-            ret += "" + hrs + ":" + (mins < 10 ? "0" : "")
+        out.hrs = hrs
+        out.mins = mins
+        out.secs = secs
+        out.sign = (sign ? '+' : '-')
+        return out
+    }
+    function a11yTime(seconds) {
+        const chunks = timeToChunks(seconds)
+        let out = ''
+        if (chunks.hrs > 0) {
+            out += `${chunks.hrs} ${dict.time.hrs} `
         }
-        ret += "" + mins + ":" + (secs < 10 ? "0" : "")
-        ret += "" + secs
-        return (sign ? '' : '-') + ret
+        out += `${chunks.mins} ${dict.time.mins} `
+        out += `${chunks.secs} ${dict.time.secs}`
+        return out
+    }
+    function taints(video) {
+        try {
+            const c = document.createElement('canvas')
+            const x = c.getContext('2d')
+            ;[c.height, c.width] = [video.videoHeight, video.videoWidth];
+            x.drawImage(video, 0, 0, 10, 10)
+            const p = x.getImageData(0, 0, c.height, c.width)
+            return false
+        } catch (err) {
+            return (err.code === 18)
+        }
     }
     // Fullscreen functions
     function enterFullscreen(el) {
