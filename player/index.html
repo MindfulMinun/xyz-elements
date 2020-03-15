@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="es-US" dir="ltr">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,14 +16,16 @@
     </head>
     <body>
         <div class="container">
-            <xyz-player poster="./thumbnail.png" data-media="{
+            <svg viewBox="0 0 32 32" style="position: absolute; top: 1rem; left: 1rem; width: 1rem; height: 1rem;"><use xlink:href="./icons/icons.svg#shrink-screen"></svg>
+            <xyz-player data-media="{
                 &quot;title&quot;: &quot;Sample title&quot;,
                 &quot;artist&quot;: &quot;Sample artist&quot;,
                 &quot;album&quot;: &quot;Sample album&quot;
-            }">
-                <!-- <source src="./www.mp4" type="video/mp4"> -->
-                <source src="https://benjic.xyz/assets/goodbye/goodbye.webm" type="video/webm">
-                <!-- <track label="English" kind="subtitles" srclang="en" src="./captions.vtt" default> -->
+            }" style="--accent: #E46A98;">
+                <source src="./www.mp4" type="video/mp4">
+                <!-- <source src="https://benjic.xyz/assets/goodbye/goodbye.webm" type="video/webm"> -->
+                <!-- <source src="https://benjic.xyz/assets/bongo/bongo.webm" type="video/webm"> -->
+                <track label="English" kind="subtitles" srclang="en" src="./www-captions.vtt" default>
             </xyz-player>
             <table style="width: 100%;">
                 <thead>
@@ -55,10 +57,6 @@
                     <tr>
                         <td><kbd>p</kbd></td>
                         <td>Entrar en modo Pantalla en Pantalla (solo si el navegador lo permite)</td>
-                    </tr>
-                    <tr>
-                        <td><kbd>d</kbd></td>
-                        <td>Depurar</td>
                     </tr>
                 </tbody>
             </table>

@@ -3,7 +3,7 @@
  */
 (function () {
     // Comment the following line for Spanish labels
-    /*
+    // /*
     const dict = {
         scrubberA11yLabel: "Búsqueda en video",
         scrubberA11yDefault: "Cargando...",
@@ -18,6 +18,7 @@
         play: 'Reproducir',
         forward: "Avanzar",
         rewind: "Retroceder",
+        settings: "Config.",
         time: {
             hrs: 'hrs',
             mins: 'min',
@@ -39,6 +40,7 @@
         play: 'Play',
         forward: "Fast\u2011forward",
         rewind: "Rewind",
+        settings: "Settings",
         time: {
             hrs: 'hrs',
             mins: 'min',
@@ -73,6 +75,13 @@
                 --idle-scrubber-thickness: 4px;
                 --hover-scrubber-thickness: 6px;
                 --standard-curve: cubic-bezier(0.4, 0, 0.2, 1);
+                --grad-end: rgba(0,0,0, .52);
+                --grad-down: var(--grad-end);
+                --grad-right: var(--grad-end);
+                /*
+                --grad-down: linear-gradient(transparent, var(--grad-end));
+                --grad-right: linear-gradient(to right, transparent, var(--grad-end));
+                */
             }
             i.material-icons { display: block; }
             video {
@@ -93,11 +102,21 @@
                 height: 100%; width: 100%;
             }
 
+            .xyz-settings {
+                position: absolute; top: .5em; right: .5em;
+                background: rgba(0,0,0,.24);
+                border-radius: 50%;
+                transition: opacity var(--standard-curve) .2s;
+            }
+            .xyz-settings .xyz-controls__btn {
+                margin: 4px;
+                display: block;
+            }
+
             .xyz-controls {
-                background: linear-gradient(transparent, rgba(0,0,0, .52));
-                /* border: 1px solid blue; */
-                padding: 1.5rem 1rem;
-                padding-bottom: 0;
+                background: var(--grad-down);
+                padding: 1rem 1rem 0 1rem;
+                backdrop-filter: blur(1px);
                 position: absolute;
                 left: 0; right: 0; bottom: 0;
                 opacity: 1;
@@ -105,6 +124,7 @@
             }
             .xyz-controls:hover .xyz-controls__scrubber__head { opacity: 1; }
             .xyz-player--hide-controls { cursor: none; }
+            .xyz-player--hide-controls .xyz-settings { opacity: 0; }
             .xyz-player--hide-controls .xyz-controls { opacity: 0; }
             .xyz-player--seeking { cursor: ew-resize; }
             .xyz-player--seeking video { opacity: .52; }
@@ -116,8 +136,8 @@
                 margin: 8px;
                 min-width: 24px;
                 color: inherit;
-                outline: none;
             }
+            /* 
             .xyz-controls__btn:focus { color: var(--accent); }
             .xyz-controls__btn[title]::after {
                 display: block;
@@ -136,7 +156,7 @@
                 color: #fff;
                 padding: 4px 6px;
                 z-index: 10;
-            }
+            } */
             .xyz-controls__btn[title]:hover::after {
                 opacity: 1;
             }
@@ -146,12 +166,10 @@
                 display: block;
                 position: relative;
                 height: var(--idle-scrubber-thickness);
-                width: 100%;
-                /* background: rgba(255,255,255,0.52); */
+                /* width: 100%; */
                 border-radius: var(--hover-scrubber-thickness);
                 touch-action: none;
                 cursor: pointer;
-                outline: none;
             }
             .xyz-controls__scrubber:hover .xyz-controls__scrubber__head::after,
             .xyz-controls__scrubber:focus .xyz-controls__scrubber__head::after {
@@ -197,9 +215,22 @@
 
             .xyz-controls__btn-group { display: flex; }
             .xyz-spacer { flex: 1 }
+
+            .svg-icon {
+                height: 20px;
+                width: 20px;
+                vertical-align: middle;
+            }
         </style>
         <div class="xyz-player">
             <video></video>
+            <div class="xyz-settings">
+                <button class="xyz-controls__btn"
+                    title="${dict.settings}"
+                    aria-label="${dict.settings}">
+                    <i class="material-icons">settings</i>
+                </button>
+            </div>
             <div class="xyz-controls">
                 <div class="xyz-controls__scrubber" tabindex="0" role="slider"
                     aria-label="${dict.scrubberA11yLabel}"
@@ -213,7 +244,6 @@
                             data-time="0:00"></div>
                     </div>
                 </div>
-
                 <div class="xyz-controls__btn-group">
                     <button class="xyz-controls__btn"
                         data-action="f-rewind"
@@ -225,7 +255,7 @@
                         data-action="pp"
                         title="${dict.play}"
                         aria-label="${dict.play}">
-                        <i class="material-icons">play_arrow</i>
+                        <img src="./icons/icons.svg#play-filled-alt" class="svg-icon">
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="f-forward"
@@ -242,19 +272,19 @@
                         data-action="pip"
                         title="${dict.pip}"
                         aria-label="${dict.pip}">
-                        PIP
+                        <img src="./icons/icons.svg#shrink-screen" class="svg-icon">
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="screenshot"
                         title="${dict.screenshot}"
                         aria-label="${dict.screenshot}">
-                        <i class="material-icons">aspect_ratio</i>
+                        <img src="./icons/icons.svg#fit-to-screen" class="svg-icon">
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="fs"
                         title="${dict.enterFs}"
                         aria-label="${dict.enterFs}">
-                        <i class="material-icons">fullscreen</i>
+                        <img src="./icons/icons.svg#maximize" class="svg-icon">
                     </button>
                 </div>
             </div>
@@ -347,6 +377,9 @@
                             v.requestPictureInPicture() : document.exitPictureInPicture()
                     }
                     break
+                case 's':
+                    !taints(v) ? takeScreenshot(v) : void 0;
+                    break;
             }
         })
 
@@ -367,10 +400,12 @@
 
             // Progress
             progress.textContent = dict.formatNumericProgress(v)
+            progress.setAttribute('aria-label', dict.scrubberA11yVal(v))
             updateScrubberProgress()
         })
         v.addEventListener('durationchange', function () {
             progress.textContent = dict.formatNumericProgress(v)
+            progress.setAttribute('aria-label', dict.scrubberA11yVal(v))
             screenshot.hidden = taints(v)
             // Antialiasing sucks.
             canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1)
@@ -382,14 +417,23 @@
         // 'play' event: (Attempt to) start playing.
         // 'playing' event: Video is definitely playing, but it may have jumped / seeked.
         v.addEventListener('play', () => {
-            pp.innerHTML = `<i class="material-icons">pause</i>`
+            // pp.innerHTML = `<i class="material-icons">pause</i>`
+            pp.innerHTML = `<img src="./icons/icons.svg#pause-filled" class="svg-icon">`
             pp.setAttribute('title', dict.pause)
             pp.setAttribute('aria-label', dict.pause)
         })
         v.addEventListener('pause', () => {
-            pp.innerHTML = `<i class="material-icons">play_arrow</i>`
+            // pp.innerHTML = `<i class="material-icons">play_arrow</i>`
+            // pp.innerHTML = `<img src="./icons/icons.svg#pause-filled" class="svg-icon">`
+            pp.innerHTML = `<img src="./icons/icons.svg#play-filled-alt" class="svg-icon">`
             pp.setAttribute('title', dict.play)
             pp.setAttribute('aria-label', dict.play)
+        })
+        v.addEventListener('enterpictureinpicture', () => {
+            pip.innerHTML = `<img src="./icons/icons.svg#shrink-screen-filled" class="svg-icon">`
+        })
+        v.addEventListener('leavepictureinpicture', () => {
+            pip.innerHTML = `<img src="./icons/icons.svg#shrink-screen" class="svg-icon">`
         })
 
         // Controller event listeners
@@ -407,25 +451,13 @@
         })
         pip.addEventListener('click', () => {
             if (document.pictureInPictureEnabled) {
-                !document.pictureInPictureElement ?
+                (v !== document.pictureInPictureElement) ?
                     v.requestPictureInPicture() : document.exitPictureInPicture()
             }
         })
         screenshot.addEventListener('click', () => {
-            const c = document.createElement('canvas')
-            const a = document.createElement('a')
-            const ctx = c.getContext('2d')
-                ;
-        
-            [c.height, c.width] = [v.videoHeight, v.videoWidth]
-            
-            ctx.drawImage(v, 0, 0, c.width, c.height)
-            a.href = c.toDataURL()
-            
-            document.body.appendChild(a)
-            a.setAttribute('download', 'frame.png')
-            a.click()
-            document.body.removeChild(a)
+            v.pause()
+            takeScreenshot(v)
         })
 
         scrubber.addEventListener('click', e => {
@@ -479,12 +511,16 @@
         let fsChangeHandler = function () {
             if (getFullscreenElement() === that) {
                 // I'm in fullscreen
+                container.classList.add('xyz-player--fullscreen')
                 fs.innerHTML = `<i class="material-icons">fullscreen_exit</i>`
+                fs.innerHTML = `<img src="./icons/icons.svg#minimize" class="svg-icon">`
                 fs.setAttribute('title', dict.exitFs)
                 fs.setAttribute('aria-label', dict.exitFs)
             } else {
                 // No longer in fullscreen
+                container.classList.remove('xyz-player--fullscreen')
                 fs.innerHTML = `<i class="material-icons">fullscreen</i>`
+                fs.innerHTML = `<img src="./icons/icons.svg#maximize" class="svg-icon">`
                 fs.setAttribute('title', dict.enterFs)
                 fs.setAttribute('aria-label', dict.enterFs)
             }
@@ -492,10 +528,10 @@
         
         that.updateMediaAttributes()
 
-        document.addEventListener("fullscreenchange", fsChangeHandler)
-        document.addEventListener("webkitfullscreenchange", fsChangeHandler)
-        document.addEventListener("mozfullscreenchange", fsChangeHandler)
-        document.addEventListener("MSFullscreenChange", fsChangeHandler)
+        that.addEventListener("fullscreenchange", fsChangeHandler)
+        that.addEventListener("webkitfullscreenchange", fsChangeHandler)
+        that.addEventListener("mozfullscreenchange", fsChangeHandler)
+        that.addEventListener("MSFullscreenChange", fsChangeHandler)
 
         // Scrubber update
         function updateScrubberProgress(linearinterop) {
@@ -697,6 +733,22 @@
             document.msFullscreenElement ||
             document.webkitFullscreenElement
         )
+    }
+    function takeScreenshot(video) {
+        const c = document.createElement('canvas')
+        const a = document.createElement('a')
+        const ctx = c.getContext('2d')
+    
+        c.height = video.videoHeight
+        c.width = video.videoWidth
+        
+        ctx.drawImage(video, 0, 0, c.width, c.height)
+        a.href = c.toDataURL()
+        
+        document.body.appendChild(a)
+        a.setAttribute('download', 'frame.png')
+        a.click()
+        document.body.removeChild(a)
     }
 
     // Export the class
