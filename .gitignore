@@ -1,2 +1,5 @@
 vids/
 node_modules/
+player/
+!player/*.js
+!player/*.html

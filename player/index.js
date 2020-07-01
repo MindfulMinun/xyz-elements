@@ -1,9 +1,10 @@
+//@ts-nocheck
 /* ======================================================
  * XyzPlayer
  */
-(function () {
+// (function () {
     // Comment the following line for Spanish labels
-    // /*
+    /*
     const dict = {
         scrubberA11yLabel: "Búsqueda en video",
         scrubberA11yDefault: "Cargando...",
@@ -29,8 +30,10 @@
     const dict = {
         scrubberA11yLabel: "Scrubber",
         scrubberA11yDefault: "Loading...",
-        scrubberA11yVal: (v) => `${a11yTime(v.currentTime)} out of ${a11yTime(v.duration)}`,
-        formatNumericProgress: (v) => `${formatTime(v.currentTime)} / ${formatTime(v.duration)}`,
+        /** @param {HTMLVideoElement} v */
+        scrubberA11yVal: v => `${a11yTime(v.currentTime)} out of ${a11yTime(v.duration)}`,
+        /** @param {HTMLVideoElement} v */
+        formatNumericProgress: v => `${formatTime(v.currentTime)} / ${formatTime(v.duration)}`,
         numericProgressDefault: '0:00 / 0:00',
         pip: 'Picture\u2011in\u2011picture',
         screenshot: 'Screenshot',
@@ -89,6 +92,7 @@
                 margin: auto;
                 height: 100%; width: 100%;
                 transition: opacity var(--standard-curve) .2s;
+                background: #000;
             }
 
             :host ::cue {
@@ -255,7 +259,7 @@
                         data-action="pp"
                         title="${dict.play}"
                         aria-label="${dict.play}">
-                        <img src="./icons/icons.svg#play-filled-alt" class="svg-icon">
+                        <i class="material-icons">play_arrow</i>
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="f-forward"
@@ -272,35 +276,37 @@
                         data-action="pip"
                         title="${dict.pip}"
                         aria-label="${dict.pip}">
-                        <img src="./icons/icons.svg#shrink-screen" class="svg-icon">
+                        <i class="material-icons">picture_in_picture_alt</i>
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="screenshot"
                         title="${dict.screenshot}"
                         aria-label="${dict.screenshot}">
-                        <img src="./icons/icons.svg#fit-to-screen" class="svg-icon">
+                        <i class="material-icons">wallpaper</i>
                     </button>
                     <button class="xyz-controls__btn"
                         data-action="fs"
                         title="${dict.enterFs}"
                         aria-label="${dict.enterFs}">
-                        <img src="./icons/icons.svg#maximize" class="svg-icon">
+                        <i class="material-icons">fullscreen</i>
                     </button>
                 </div>
             </div>
         </div>
     `
 
+    /** @param {XyzPlayer} that */
     const init = function (that) {
         const shadow = that.shadowRoot
-
-        /** @type HTMLVideoElement */
+        if (!shadow) throw Error('Expected shadow root mode to be open.')
+        
         const v = shadow.querySelector('video')
         const container = shadow.querySelector('.xyz-player')
         const controls = shadow.querySelector('.xyz-controls')
         const scrubber = shadow.querySelector('.xyz-controls__scrubber')
         const scrubberProgress = shadow.querySelector('.xyz-controls__scrubber__progress')
         const scrubberHead = shadow.querySelector('.xyz-controls__scrubber__head')
+        /** @type {HTMLCanvasElement} */
         const canvas = shadow.querySelector('.xyz-controls__scrubber-loaded')
         const ctx = canvas.getContext('2d')
         const progress = shadow.querySelector('.xyz-controls__time')
@@ -312,11 +318,17 @@
         const fs = shadow.querySelector('[data-action="fs"]')
         const pip = shadow.querySelector('[data-action="pip"]')
 
+        if (!(
+            v && container && controls && scrubber && scrubberProgress && scrubberHead && canvas && ctx && progress && fr && pp && screenshot && ff && fs && pip
+            )) {
+                throw Error("Internal error, one or more HTML elements aren't in the shadow")
+        }
+
         requestAnimationFrame(() => {
             v.append(...that.children)
         })
 
-        that.setAttribute('tabindex', 0)
+        that.setAttribute('tabindex', '0')
 
         // Hide the PIP button if the browser doesn't support it.
         pip.hidden = !document.pictureInPictureEnabled
@@ -392,8 +404,8 @@
 
         v.addEventListener('timeupdate', function () {
             // A11y attributes
-            scrubber.setAttribute('aria-valuemax', ~~v.duration)
-            scrubber.setAttribute('aria-valuenow', ~~v.currentTime)
+            scrubber.setAttribute('aria-valuemax', '' + ~~v.duration)
+            scrubber.setAttribute('aria-valuenow', '' + ~~v.currentTime)
             scrubber.setAttribute('aria-valuetext',
                 dict.scrubberA11yVal(v)
             )
@@ -406,7 +418,7 @@
         v.addEventListener('durationchange', function () {
             progress.textContent = dict.formatNumericProgress(v)
             progress.setAttribute('aria-label', dict.scrubberA11yVal(v))
-            screenshot.hidden = taints(v)
+            screenshot.hidden = !taints(v)
             // Antialiasing sucks.
             canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1)
         })
@@ -417,29 +429,25 @@
         // 'play' event: (Attempt to) start playing.
         // 'playing' event: Video is definitely playing, but it may have jumped / seeked.
         v.addEventListener('play', () => {
-            // pp.innerHTML = `<i class="material-icons">pause</i>`
-            pp.innerHTML = `<img src="./icons/icons.svg#pause-filled" class="svg-icon">`
+            pp.innerHTML = `<i class="material-icons">pause</i>`
             pp.setAttribute('title', dict.pause)
             pp.setAttribute('aria-label', dict.pause)
         })
         v.addEventListener('pause', () => {
-            // pp.innerHTML = `<i class="material-icons">play_arrow</i>`
-            // pp.innerHTML = `<img src="./icons/icons.svg#pause-filled" class="svg-icon">`
-            pp.innerHTML = `<img src="./icons/icons.svg#play-filled-alt" class="svg-icon">`
+            pp.innerHTML = `<i class="material-icons">play_arrow</i>`
             pp.setAttribute('title', dict.play)
             pp.setAttribute('aria-label', dict.play)
         })
         v.addEventListener('enterpictureinpicture', () => {
-            pip.innerHTML = `<img src="./icons/icons.svg#shrink-screen-filled" class="svg-icon">`
+            pip.innerHTML = `<i class="material-icons">branding_watermark</i>`
         })
         v.addEventListener('leavepictureinpicture', () => {
-            pip.innerHTML = `<img src="./icons/icons.svg#shrink-screen" class="svg-icon">`
+            pip.innerHTML = `<i class="material-icons">picture_in_picture_alt</i>`
         })
 
         // Controller event listeners
         ff.addEventListener('click', () => {
             v.currentTime += 5
-            v.currentTime = unit * +e.key
             updateScrubberProgress()
         })
         fr.addEventListener('click', () => {
@@ -467,7 +475,7 @@
             updateScrubberProgress()
         })
 
-        let stateBeforeScrub = null
+        let stateBeforeScrub = ''
         scrubber.addEventListener('dragstart', e => {
             const img = new Image()
             img.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
@@ -484,9 +492,10 @@
             // Just assume the scrubber isn't in the top left corner and ignore (0, 0)
             if (e.screenX + e.screenY + e.clientX + e.clientY !== 0) {
                 var rect = scrubber.getBoundingClientRect()
+
                 var x = (e.clientX - rect.left) / rect.width
                 v.currentTime = v.duration * x
-                updateScrubberProgress(x)
+                updateScrubberProgress()
             }
             restartIdleTimeout()
         }, { passive: true })
@@ -501,7 +510,7 @@
             if (stateBeforeScrub === 'playing') {
                 v.play()
             }
-            stateBeforeScrub = null
+            stateBeforeScrub = ''
         })
 
         fs.addEventListener('click', () => {
@@ -513,14 +522,12 @@
                 // I'm in fullscreen
                 container.classList.add('xyz-player--fullscreen')
                 fs.innerHTML = `<i class="material-icons">fullscreen_exit</i>`
-                fs.innerHTML = `<img src="./icons/icons.svg#minimize" class="svg-icon">`
                 fs.setAttribute('title', dict.exitFs)
                 fs.setAttribute('aria-label', dict.exitFs)
             } else {
                 // No longer in fullscreen
                 container.classList.remove('xyz-player--fullscreen')
                 fs.innerHTML = `<i class="material-icons">fullscreen</i>`
-                fs.innerHTML = `<img src="./icons/icons.svg#maximize" class="svg-icon">`
                 fs.setAttribute('title', dict.enterFs)
                 fs.setAttribute('aria-label', dict.enterFs)
             }
@@ -534,13 +541,9 @@
         that.addEventListener("MSFullscreenChange", fsChangeHandler)
 
         // Scrubber update
-        function updateScrubberProgress(linearinterop) {
+        function updateScrubberProgress() {
             // Scrubber Progress
-            
-            if (v.seeking && !linearinterop) { return }
-            linearinterop = (linearinterop * v.duration) || v.currentTime
-
-            let ratio = linearinterop / v.duration * 100
+            let ratio = v.currentTime / v.duration * 100
             if (Number.isFinite(ratio)) {
                 if (scrubberProgress.attributeStyleMap) {
                     let perc = CSS.percent(ratio)
@@ -554,8 +557,6 @@
             var unit = canvas.width / v.duration
             ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-            // ctx.fillStyle = 'rgba(255,255,255, .52)';
-            // ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'rgba(255,255,255, .72)'
 
             for (var i = 0; i < v.buffered.length; i++) {
@@ -568,9 +569,10 @@
             }
         }
         // Hide controls on idle
+        /** @type {NodeJS.Timeout | null} */
         let idleTimeout = null
         function restartIdleTimeout() {
-            clearTimeout(idleTimeout)
+            if (idleTimeout) { clearTimeout(idleTimeout) }
             container.classList.remove('xyz-player--hide-controls')
             idleTimeout = setTimeout(function () {
                 container.classList.add('xyz-player--hide-controls')
@@ -704,7 +706,7 @@
             const p = x.getImageData(0, 0, c.height, c.width)
             return false
         } catch (err) {
-            return (err.code === 18)
+            return true
         }
     }
     // Fullscreen functions
@@ -754,7 +756,10 @@
     // Export the class
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = XyzPlayer
+    } else if (typeof globalThis !== 'undefined') {
+        globalThis.XyzPlayer = XyzPlayer
     }
-    this.XyzPlayer = XyzPlayer
+    // this.XyzPlayer = XyzPlayer
+    export default XyzPlayer
     // To enable the class, call XyzPlayer.register()
-}());
+// }());
